@@ -11,7 +11,7 @@ This project is an automated data pipeline designed to bridge that gap. It takes
 3. **Personalized Biomarker Screening:** Scans the sample for critical bacteria that impact daily health and flags them using intuitive visual cues.
 4. **Consumer-Friendly Dashboard:** Generates a standalone, beautifully structured `report.html` file that reads like a commercial health report rather than a laboratory printout.
 
-![Gut health dashboard](docs/Screenshot 2026-05-20 at 10.53.34.png)
+![Gut health dashboard](docs/screenshot.png)
 
 ## Tracked Bacterial Markers (Examples for Proof of Concept)
 The pipeline is built with a modular architecture, meaning it can easily expand to track any bacterial profile. For the initial **Proof of Concept (POC)**, the system is pre-configured to detect and explain a representative list of key bacteria known to heavily influence overall wellness:

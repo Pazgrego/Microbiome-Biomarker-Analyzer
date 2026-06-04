@@ -29,7 +29,6 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 warnings.filterwarnings("ignore")
 
@@ -245,7 +244,6 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
     else:
         top10["Label"] = []
 
-    # ── Generate embedded Pie Chart (pie + legend sized to fit report box) ──
     pie_base64 = ""
     if not top10.empty:
         colors = plt.cm.get_cmap("tab20c")(range(len(top10)))
@@ -266,17 +264,24 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
 
         ring_width = 0.55
         ring_mid = 1 - ring_width / 2
+        min_slice_label_pct = 9.0
+
+        def _slice_pct_label(pct):
+            return f"{pct:.1f}%" if pct >= min_slice_label_pct else ""
 
         wedges, _, autotexts = ax_pie.pie(
             top10["Abundance"],
             colors=colors,
             startangle=140,
             wedgeprops=dict(width=ring_width, edgecolor="w"),
-            autopct="%1.1f%%",
-            textprops={"fontsize": 8, "fontweight": "bold", "color": "white"},
+            autopct=_slice_pct_label,
+            textprops={"fontsize": 10, "fontweight": "bold", "color": "white"},
         )
         ax_pie.set_aspect("equal")
         for wedge, autotext in zip(wedges, autotexts):
+            if not autotext.get_text():
+                autotext.set_visible(False)
+                continue
             autotext.set_color("white")
             angle = math.radians((wedge.theta1 + wedge.theta2) / 2)
             autotext.set_position((

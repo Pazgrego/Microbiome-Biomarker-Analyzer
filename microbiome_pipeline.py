@@ -19,6 +19,7 @@ import argparse
 import base64
 from html import escape as html_escape
 import io
+import json
 import math
 import os
 import sys
@@ -65,6 +66,67 @@ BIOMARKER_THRESHOLDS = {
 
 # Default threshold for any other biomarkers not explicitly defined in BIOMARKER_THRESHOLDS
 DEFAULT_BIOMARKER_THRESHOLD = 0.001        # (0.1%)
+
+# Educational copy for the report (key = biomarker display name in BIOMARKER_SEARCH)
+BIOMARKER_ROLES = {
+    "Akkermansia muciniphila": {
+        "title": "Akkermansia muciniphila",
+        "body": (
+            "This specialized bacterium is a crucial gatekeeper of gut barrier integrity. "
+            "It uniquely resides in and feeds on the mucus layer lining the intestinal walls. "
+            "By degrading this mucus, it stimulates the body to constantly produce fresh, healthy mucus, "
+            "effectively strengthening the gut barrier and preventing toxins from leaking into the bloodstream "
+            '(a condition often referred to as "leaky gut"). A robust population of Akkermansia muciniphila '
+            "is strongly associated with healthy metabolic functions, reduced systemic inflammation, and a lower "
+            "risk of developing obesity and type 2 diabetes."
+        ),
+    },
+    "Ruminococcus bromii": {
+        "title": "Ruminococcus bromii",
+        "body": (
+            'Commonly described as a "keystone species" in the human colon, this bacterium possesses a highly '
+            "specialized enzymatic machinery required to break down resistant starch and complex dietary fibers "
+            "that our bodies cannot digest on their own. By initiating the degradation of these tough carbohydrates, "
+            "Ruminococcus bromii acts as a primary recycler in the gut ecosystem, breaking food down into simpler "
+            "sugars. This process releases vital nutrients and paves the way for other beneficial bacteria to "
+            "consume those leftovers and convert them into protective compounds."
+        ),
+    },
+    "Eubacterium sp": {
+        "title": "Eubacterium group (Eubacterium sp.)",
+        "body": (
+            "This core group of core intestinal bacteria plays a massive role in maintaining a balanced gut microbiome "
+            "through the fermentation of complex plant polysaccharides and prebiotic fibers. As they ferment these "
+            "fibers, they generate large quantities of short-chain fatty acids (SCFAs), which lower the pH of the "
+            "colon, making it an unwelcoming environment for harmful pathogens. Furthermore, specific species within "
+            "this genus have been shown to actively participate in anti-inflammatory pathways, support metabolic "
+            "homeostasis, and influence the gut-brain axis, thereby contributing to overall cognitive health."
+        ),
+    },
+    "Faecalibacterium prausnitzii": {
+        "title": "Faecalibacterium prausnitzii",
+        "body": (
+            "Widely recognized as one of the most abundant and vital pillars of a healthy adult gut microbiome, "
+            "this bacterium serves as a primary factory for butyrate, a critical short-chain fatty acid. Butyrate "
+            "acts as the main fuel source for the cells lining the colon, keeping them healthy and functional. "
+            "Beyond nourishment, Faecalibacterium prausnitzii exerts powerful, direct anti-inflammatory effects by "
+            "modulating the immune system and blocking inflammatory signaling pathways. Low levels of this bacterium "
+            "are consistently documented in individuals suffering from inflammatory bowel diseases (IBD), metabolic "
+            "disorders, and depression."
+        ),
+    },
+    "Roseburia sp": {
+        "title": "Roseburia group (Roseburia sp.)",
+        "body": (
+            "This genus consists of highly active carbohydrate-fermenting bacteria that work in close harmony with "
+            "other fiber degraders to produce butyrate. By generating this fatty acid, Roseburia species help maintain "
+            "the mucosal lining, enhance intestinal motility, and provide the energy necessary to sustain a robust "
+            "immune defense within the gut. Their prevalence is strongly tied to a fiber-rich, Mediterranean-style diet, "
+            "and maintaining an optimal abundance of Roseburia is essential for preventing low-grade chronic "
+            "inflammation, metabolic syndrome, and irritable bowel symptoms."
+        ),
+    },
+}
 
 # ── Helper functions ───────────────────────────────────────────────────────────
 
@@ -337,9 +399,11 @@ def generate_html_report(analysis: dict, output_path: str):
         thresh_pct = b["threshold"] * 100
         tip = f"Threshold: ≥ {thresh_pct:.2f}% relative abundance"
         tip_attr = html_escape(tip, quote=True)
+        role_key = html_escape(b["name"], quote=True)
         biomarker_rows_html += f"""
-        <tr>
-          <td><strong>{b['name']}</strong></td>
+        <tr class="biomarker-row" data-role-key="{role_key}" tabindex="0" role="button"
+            aria-expanded="false" aria-controls="biomarker-detail">
+          <td class="biomarker-taxon-cell"><strong>{html_escape(b['name'])}</strong></td>
           <td style="text-align:right">{b['abundance']:,}</td>
           <td style="text-align:right; font-weight:600;">{pct_display}</td>
           <td class="status-cell">
@@ -350,6 +414,8 @@ def generate_html_report(analysis: dict, output_path: str):
             </span>
           </td>
         </tr>"""
+
+    biomarker_roles_json = json.dumps(BIOMARKER_ROLES)
 
     # Format Top 10 rows
     top10_rows_html = ""
@@ -518,6 +584,65 @@ def generate_html_report(analysis: dict, output_path: str):
   .status-sufficient {{ background: #dcfce7; color: #166534; }}
   .status-low {{ background: #fee2e2; color: #991b1b; }}
   .biomarker-card {{ overflow: visible; }}
+  .biomarker-hint {{
+    margin: -4px 0 12px 0;
+    font-size: 13px;
+    color: #6b7280;
+  }}
+  .biomarker-row {{
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }}
+  .biomarker-row:hover {{
+    background: #f3f4f6;
+  }}
+  .biomarker-row.is-selected {{
+    background: #eef2ff;
+  }}
+  .biomarker-row.is-selected .biomarker-taxon-cell strong {{
+    color: #4f46e5;
+  }}
+  .biomarker-taxon-cell strong::after {{
+    content: " ▸";
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 400;
+  }}
+  .biomarker-row.is-selected .biomarker-taxon-cell strong::after {{
+    content: " ▾";
+    color: #4f46e5;
+  }}
+  .biomarker-detail {{
+    display: none;
+    margin: 0;
+    padding: 16px 18px;
+    border-top: 1px solid #e5e7eb;
+    background: #f8fafc;
+  }}
+  .biomarker-detail.is-open {{
+    display: block;
+  }}
+  .biomarker-detail h4 {{
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #4f46e5;
+  }}
+  .biomarker-detail p {{
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #374151;
+  }}
+  .biomarker-detail-placeholder {{
+    margin: 0;
+    padding: 14px 18px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 13px;
+    color: #9ca3af;
+    font-style: italic;
+    background: #fafafa;
+  }}
   .composition-section h2 {{
     font-size: 22px;
     margin-bottom: 10px;
@@ -572,10 +697,11 @@ def generate_html_report(analysis: dict, output_path: str):
     </div>
   </section>
 
-  <section>
+  <section class="full-width">
     <h2>🛡️ Health Biomarkers</h2>
+    <p class="biomarker-hint">Click a target taxon to learn about its role in gut health.</p>
     <div class="card biomarker-card" style="padding:0;">
-      <table>
+      <table class="biomarker-table">
         <thead>
           <tr>
             <th>Target Taxon</th>
@@ -586,7 +712,74 @@ def generate_html_report(analysis: dict, output_path: str):
         </thead>
         <tbody>{biomarker_rows_html}</tbody>
       </table>
+      <p id="biomarker-detail-placeholder" class="biomarker-detail-placeholder">
+        Select a target taxon above to read about its role.
+      </p>
+      <div id="biomarker-detail" class="biomarker-detail" aria-live="polite">
+        <h4 id="biomarker-detail-title"></h4>
+        <p id="biomarker-detail-body"></p>
+      </div>
     </div>
+    <script type="application/json" id="biomarker-roles-json">{biomarker_roles_json}</script>
+    <script>
+    (function () {{
+      const roles = JSON.parse(document.getElementById("biomarker-roles-json").textContent);
+      const panel = document.getElementById("biomarker-detail");
+      const placeholder = document.getElementById("biomarker-detail-placeholder");
+      const titleEl = document.getElementById("biomarker-detail-title");
+      const bodyEl = document.getElementById("biomarker-detail-body");
+      let selectedRow = null;
+
+      function closeDetail() {{
+        selectedRow = null;
+        document.querySelectorAll(".biomarker-row").forEach((r) => {{
+          r.classList.remove("is-selected");
+          r.setAttribute("aria-expanded", "false");
+        }});
+        panel.classList.remove("is-open");
+        placeholder.style.display = "block";
+      }}
+
+      function openDetail(row) {{
+        const key = row.getAttribute("data-role-key");
+        const role = roles[key];
+        if (!role) return;
+
+        if (selectedRow === row) {{
+          closeDetail();
+          return;
+        }}
+
+        document.querySelectorAll(".biomarker-row").forEach((r) => {{
+          r.classList.remove("is-selected");
+          r.setAttribute("aria-expanded", "false");
+        }});
+        row.classList.add("is-selected");
+        row.setAttribute("aria-expanded", "true");
+        selectedRow = row;
+
+        titleEl.textContent = role.title;
+        bodyEl.textContent = role.body;
+        placeholder.style.display = "none";
+        panel.classList.add("is-open");
+        panel.scrollIntoView({{ behavior: "smooth", block: "nearest" }});
+      }}
+
+      document.querySelectorAll(".biomarker-row").forEach((row) => {{
+        row.addEventListener("click", (e) => {{
+          if (e.target.closest(".status-cell")) return;
+          openDetail(row);
+        }});
+        row.addEventListener("keydown", (e) => {{
+          if (e.target.closest(".status-cell")) return;
+          if (e.key === "Enter" || e.key === " ") {{
+            e.preventDefault();
+            openDetail(row);
+          }}
+        }});
+      }});
+    }})();
+    </script>
   </section>
 
   <section class="full-width composition-section">

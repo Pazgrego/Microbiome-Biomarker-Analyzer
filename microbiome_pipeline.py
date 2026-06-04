@@ -19,6 +19,7 @@ import argparse
 import base64
 from html import escape as html_escape
 import io
+import math
 import os
 import sys
 import warnings
@@ -244,39 +245,69 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
     else:
         top10["Label"] = []
 
-    # ── Generate embedded Pie Chart ──
+    # ── Generate embedded Pie Chart (pie + legend sized to fit report box) ──
     pie_base64 = ""
     if not top10.empty:
-        plt.figure(figsize=(9, 7))
         colors = plt.cm.get_cmap("tab20c")(range(len(top10)))
-        
-        # Use simple label fallback if formatting fails
         labels = top10["Label"].tolist() if "Label" in top10.columns else top10["Name"].tolist()
-        
-        wedges, _ = plt.pie(
+
+        legend_labels = []
+        for label in labels:
+            short = str(label)
+            if len(short) > 32:
+                short = short[:29] + "..."
+            legend_labels.append(short)
+
+        fig = plt.figure(figsize=(10, 5.2))
+        gs = fig.add_gridspec(1, 2, width_ratios=[1, 1.12], wspace=0.04)
+        ax_pie = fig.add_subplot(gs[0, 0])
+        ax_leg = fig.add_subplot(gs[0, 1])
+        ax_leg.axis("off")
+
+        ring_width = 0.55
+        ring_mid = 1 - ring_width / 2
+
+        wedges, _, autotexts = ax_pie.pie(
             top10["Abundance"],
             colors=colors,
             startangle=140,
-            wedgeprops=dict(width=0.4, edgecolor='w')
+            wedgeprops=dict(width=ring_width, edgecolor="w"),
+            autopct="%1.1f%%",
+            textprops={"fontsize": 8, "fontweight": "bold", "color": "white"},
         )
-        
-        # Generate legend text with clean percentages
-        legend_labels = []
-        for l, p in zip(labels, top10["RelativeAbundance"]):
-            legend_labels.append(f"{l} ({p*100:.2f}%)")
+        ax_pie.set_aspect("equal")
+        for wedge, autotext in zip(wedges, autotexts):
+            autotext.set_color("white")
+            angle = math.radians((wedge.theta1 + wedge.theta2) / 2)
+            autotext.set_position((
+                ring_mid * math.cos(angle),
+                ring_mid * math.sin(angle),
+            ))
+            autotext.set_horizontalalignment("center")
+            autotext.set_verticalalignment("center")
 
-        plt.legend(
-            wedges, legend_labels,
+        ax_pie.text(
+            0, 0, "Top 10\nSpecies",
+            ha="center", va="center",
+            fontsize=14, fontweight="bold", color="#1a1a2e", linespacing=1.15,
+        )
+
+        ax_leg.legend(
+            wedges,
+            legend_labels,
             title="Taxa",
             loc="center left",
-            bbox_to_anchor=(1, 0, 0.5, 1),
-            frameon=False
+            fontsize=11,
+            title_fontsize=12,
+            frameon=False,
+            borderaxespad=0,
         )
-        plt.tight_layout()
+
+        fig.subplots_adjust(left=0.02, right=0.99, top=0.98, bottom=0.02)
 
         buf = io.BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight", dpi=140)
-        plt.close()
+        fig.savefig(buf, format="png", dpi=120, facecolor="white", pad_inches=0.05)
+        plt.close(fig)
         buf.seek(0)
         pie_base64 = base64.b64encode(buf.read()).decode("utf-8")
 
@@ -484,27 +515,23 @@ def generate_html_report(analysis: dict, output_path: str):
   .biomarker-card {{ overflow: visible; }}
   .composition-section h2 {{
     font-size: 22px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }}
   .composition-card {{
-    padding: 28px 24px 32px;
-    min-height: 420px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 8px 12px 12px;
+    overflow: hidden;
   }}
   .composition-card .img-wrap {{
     width: 100%;
-    max-width: 820px;
-    margin: 0 auto;
-    text-align: center;
+    line-height: 0;
   }}
   .composition-card .img-wrap img {{
+    display: block;
     width: 100%;
-    max-width: 780px;
-    min-height: 320px;
     height: auto;
+    max-height: 520px;
     object-fit: contain;
+    object-position: center;
   }}
   footer {{
     max-width: 900px;

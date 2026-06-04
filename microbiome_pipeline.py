@@ -541,7 +541,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>🛡️ Health Biomarkers (Custom Thresholds)</h2>
+    <h2>🛡️ Health Biomarkers</h2>
     <div class="card biomarker-card" style="padding:0;">
       <table>
         <thead>

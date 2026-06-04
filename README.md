@@ -5,6 +5,30 @@ Most people who take a gut microbiome test receive a confusing, massive spreadsh
 
 This project is an automated data pipeline designed to bridge that gap. It takes raw, technical microbiome data and transforms it into a clean, easy-to-understand **HTML visual report designed for everyday users (patients, biohackers, or health enthusiasts)**. The tool simplifies the science, providing clear visual insights into their gut health without requiring a background in biology.
 
+## How to run
+
+1. **Install dependencies** (Python 3):
+
+   ```bash
+   pip install pandas matplotlib
+   ```
+
+2. **Generate the report** from an OTU table (CSV or `.numbers`):
+
+   ```bash
+   python microbiome_pipeline.py --input sample_otu_table.csv --output report.html
+   ```
+
+   Use your own file with `--input` / `-i`. Optional: `--output` / `-o` (default: `report.html`).
+
+3. **Open the HTML** in your browser (macOS):
+
+   ```bash
+   open report.html
+   ```
+
+   Or double-click `report.html` in Finder. The report is a standalone file—no server needed.
+
 ## Core Features
 1. **Raw Data Translation:** Converts technical OTU tables (CSV format) into user-friendly insights.
 2. **Relative Abundance Made Simple:** Translates raw bacterial sequence counts into clear percentages so users know exactly what ratio of their gut is made up of which bacteria.

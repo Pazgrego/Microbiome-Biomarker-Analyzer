@@ -76,6 +76,7 @@
     vertical-align: middle;
   }
   tr:last-child td { border-bottom: none; }
+  .status-cell { position: relative; overflow: visible; }
   .status-badge {
     display: inline-block;
     padding: 3px 8px;
@@ -84,8 +85,61 @@
     font-weight: 600;
     text-transform: uppercase;
   }
+  .status-badge.has-threshold {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+  }
+  .status-info-mark {
+    font-size: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.15s ease;
+  }
+  .status-badge.has-threshold:hover .status-info-mark,
+  .status-badge.has-threshold:focus-visible .status-info-mark {
+    opacity: 0.85;
+  }
+  .status-badge.has-threshold:hover,
+  .status-badge.has-threshold:focus-visible {
+    outline: none;
+  }
+  .status-badge.has-threshold::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%);
+    max-width: 280px;
+    white-space: normal;
+    text-align: center;
+    text-transform: none;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #1f2937;
+    color: #f9fafb;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 20;
+  }
+  .status-badge.has-threshold:hover::after,
+  .status-badge.has-threshold:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+  }
   .status-sufficient { background: #dcfce7; color: #166534; }
   .status-low { background: #fee2e2; color: #991b1b; }
+  .biomarker-card { overflow: visible; }
   .composition-section h2 {
     font-size: 22px;
     margin-bottom: 16px;
@@ -146,7 +200,7 @@
 
   <section>
     <h2>🛡️ Health Biomarkers (Custom Thresholds)</h2>
-    <div class="card" style="padding:0; overflow:hidden;">
+    <div class="card biomarker-card" style="padding:0;">
       <table>
         <thead>
           <tr>
@@ -161,31 +215,61 @@
           <td><strong>Akkermansia muciniphila</strong></td>
           <td style="text-align:right">819</td>
           <td style="text-align:right; font-weight:600;">0.17%</td>
-          <td><span class="status-badge status-low">Low / Absent</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold status-low"
+                  data-tip="Threshold: ≥ 0.30% relative abundance" title="Threshold: ≥ 0.30% relative abundance" tabindex="0"
+                  aria-label="Low / Absent. Threshold: ≥ 0.30% relative abundance">
+              Low / Absent<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr>
         <tr>
           <td><strong>Ruminococcus bromii</strong></td>
           <td style="text-align:right">0</td>
           <td style="text-align:right; font-weight:600;">0.00%</td>
-          <td><span class="status-badge status-low">Low / Absent</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold status-low"
+                  data-tip="Threshold: ≥ 0.50% relative abundance" title="Threshold: ≥ 0.50% relative abundance" tabindex="0"
+                  aria-label="Low / Absent. Threshold: ≥ 0.50% relative abundance">
+              Low / Absent<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr>
         <tr>
           <td><strong>Eubacterium sp</strong></td>
           <td style="text-align:right">12,416</td>
           <td style="text-align:right; font-weight:600;">2.59%</td>
-          <td><span class="status-badge status-sufficient">Sufficient</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold status-sufficient"
+                  data-tip="Threshold: ≥ 1.00% relative abundance" title="Threshold: ≥ 1.00% relative abundance" tabindex="0"
+                  aria-label="Sufficient. Threshold: ≥ 1.00% relative abundance">
+              Sufficient<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr>
         <tr>
           <td><strong>Faecalibacterium prausnitzii</strong></td>
           <td style="text-align:right">0</td>
           <td style="text-align:right; font-weight:600;">0.00%</td>
-          <td><span class="status-badge status-low">Low / Absent</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold status-low"
+                  data-tip="Threshold: ≥ 1.00% relative abundance" title="Threshold: ≥ 1.00% relative abundance" tabindex="0"
+                  aria-label="Low / Absent. Threshold: ≥ 1.00% relative abundance">
+              Low / Absent<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr>
         <tr>
           <td><strong>Roseburia sp</strong></td>
           <td style="text-align:right">3,061</td>
           <td style="text-align:right; font-weight:600;">0.64%</td>
-          <td><span class="status-badge status-sufficient">Sufficient</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold status-sufficient"
+                  data-tip="Threshold: ≥ 0.50% relative abundance" title="Threshold: ≥ 0.50% relative abundance" tabindex="0"
+                  aria-label="Sufficient. Threshold: ≥ 0.50% relative abundance">
+              Sufficient<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr></tbody>
       </table>
     </div>
@@ -350,7 +434,7 @@
 </main>
 
 <footer>
-  <p>Microbiome Pipeline · generated 2026-06-04 11:34:31 · for research purposes only</p>
+  <p>Microbiome Pipeline · generated 2026-06-04 11:43:48 · for research purposes only</p>
 </footer>
 
 </body>

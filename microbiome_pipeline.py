@@ -17,6 +17,7 @@ CSV format expected:
 
 import argparse
 import base64
+from html import escape as html_escape
 import io
 import os
 import sys
@@ -231,6 +232,7 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
                 "abundance": agg_abundance,
                 "relative_pct": agg_pct,
                 "status": status,
+                "threshold": current_threshold,
                 "match_count": len(matched),
             }
         )
@@ -296,12 +298,21 @@ def generate_html_report(analysis: dict, output_path: str):
     for b in analysis["biomarkers"]:
         status_class = "status-sufficient" if b["status"] == "Sufficient" else "status-low"
         pct_display = f"{b['relative_pct'] * 100:.2f}%"
+        thresh_pct = b["threshold"] * 100
+        tip = f"Threshold: ≥ {thresh_pct:.2f}% relative abundance"
+        tip_attr = html_escape(tip, quote=True)
         biomarker_rows_html += f"""
         <tr>
           <td><strong>{b['name']}</strong></td>
           <td style="text-align:right">{b['abundance']:,}</td>
           <td style="text-align:right; font-weight:600;">{pct_display}</td>
-          <td><span class="status-badge {status_class}">{b['status']}</span></td>
+          <td class="status-cell">
+            <span class="status-badge has-threshold {status_class}"
+                  data-tip="{tip_attr}" title="{tip_attr}" tabindex="0"
+                  aria-label="{html_escape(b['status'] + '. ' + tip, quote=True)}">
+              {b['status']}<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+            </span>
+          </td>
         </tr>"""
 
     # Format Top 10 rows
@@ -407,6 +418,7 @@ def generate_html_report(analysis: dict, output_path: str):
     vertical-align: middle;
   }}
   tr:last-child td {{ border-bottom: none; }}
+  .status-cell {{ position: relative; overflow: visible; }}
   .status-badge {{
     display: inline-block;
     padding: 3px 8px;
@@ -415,8 +427,61 @@ def generate_html_report(analysis: dict, output_path: str):
     font-weight: 600;
     text-transform: uppercase;
   }}
+  .status-badge.has-threshold {{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: default;
+  }}
+  .status-info-mark {{
+    font-size: 12px;
+    line-height: 1;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.15s ease;
+  }}
+  .status-badge.has-threshold:hover .status-info-mark,
+  .status-badge.has-threshold:focus-visible .status-info-mark {{
+    opacity: 0.85;
+  }}
+  .status-badge.has-threshold:hover,
+  .status-badge.has-threshold:focus-visible {{
+    outline: none;
+  }}
+  .status-badge.has-threshold::after {{
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%);
+    max-width: 280px;
+    white-space: normal;
+    text-align: center;
+    text-transform: none;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #1f2937;
+    color: #f9fafb;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+    z-index: 20;
+  }}
+  .status-badge.has-threshold:hover::after,
+  .status-badge.has-threshold:focus-visible::after {{
+    opacity: 1;
+    visibility: visible;
+  }}
   .status-sufficient {{ background: #dcfce7; color: #166534; }}
   .status-low {{ background: #fee2e2; color: #991b1b; }}
+  .biomarker-card {{ overflow: visible; }}
   .composition-section h2 {{
     font-size: 22px;
     margin-bottom: 16px;
@@ -477,7 +542,7 @@ def generate_html_report(analysis: dict, output_path: str):
 
   <section>
     <h2>🛡️ Health Biomarkers (Custom Thresholds)</h2>
-    <div class="card" style="padding:0; overflow:hidden;">
+    <div class="card biomarker-card" style="padding:0;">
       <table>
         <thead>
           <tr>

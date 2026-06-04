@@ -410,7 +410,7 @@ def generate_html_report(analysis: dict, output_path: str):
             <span class="status-badge has-threshold {status_class}"
                   data-tip="{tip_attr}" title="{tip_attr}" tabindex="0"
                   aria-label="{html_escape(b['status'] + '. ' + tip, quote=True)}">
-              {b['status']}<span class="status-info-mark" aria-hidden="true">ⓘ</span>
+              {b['status']}<span class="status-info-mark" aria-hidden="true"></span>
             </span>
           </td>
         </tr>"""
@@ -537,11 +537,24 @@ def generate_html_report(analysis: dict, output_path: str):
     cursor: default;
   }}
   .status-info-mark {{
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1;
     flex-shrink: 0;
     opacity: 0.5;
     transition: opacity 0.15s ease;
+  }}
+  .status-info-mark::before {{
+    content: "i";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    font-size: 9px;
+    font-weight: 700;
+    font-style: italic;
   }}
   .status-badge.has-threshold:hover .status-info-mark,
   .status-badge.has-threshold:focus-visible .status-info-mark {{
@@ -677,14 +690,14 @@ def generate_html_report(analysis: dict, output_path: str):
 <body>
 
 <header>
-  <h1>🔬 Microbiome Analysis Report</h1>
+  <h1>Microbiome Analysis Report</h1>
   <p class="subtitle">Automated high-throughput OTU profiling pipeline</p>
 </header>
 
 <main>
 
   <section class="full-width">
-    <h2>📈 Sequencing Overview</h2>
+    <h2>Sequencing Overview</h2>
     <div class="card metrics-grid">
       <div class="metric-box">
         <div class="metric-val">{analysis['total_reads']:,}</div>
@@ -698,7 +711,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section class="full-width">
-    <h2>🛡️ Health Biomarkers</h2>
+    <h2>Health Biomarkers</h2>
     <p class="biomarker-hint">Click a target taxon to learn about its role in gut health.</p>
     <div class="card biomarker-card" style="padding:0;">
       <table class="biomarker-table">
@@ -783,7 +796,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section class="full-width composition-section">
-    <h2>🎨 Composition Profile</h2>
+    <h2>Composition Profile</h2>
     <div class="card composition-card">
       <div class="img-wrap">
         <img src="{pie_src}" alt="Top 10 species pie chart — relative abundance">
@@ -792,7 +805,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section class="full-width">
-    <h2>📊 Top 10 Most Abundant Species</h2>
+    <h2>Top 10 Most Abundant Species</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>

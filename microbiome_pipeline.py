@@ -3,7 +3,8 @@ Microbiome OTU Analysis Pipeline
 =================================
 Reads a CSV (or .numbers) OTU table, calculates relative abundances,
 extracts 5 key biomarkers with biological thresholds, computes alpha diversity,
-generates a polished interactive Plotly donut chart with center text, and writes a standalone HTML report.
+generates a polished interactive Plotly donut chart, and writes a standalone HTML report
+with interactive dynamic status tooltips (info icons).
 
 Usage:
     python microbiome_pipeline.py --input data.csv --output report.html
@@ -194,6 +195,7 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
                     "abundance": agg_abundance,
                     "relative_pct": agg_pct,
                     "status": status,
+                    "threshold_pct": current_threshold,
                     "match_count": len(matched),
                 }
             )
@@ -219,14 +221,14 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
                 custom_data=['Percentage']
             )
             
+            # FIXED: Removed 'insidetextanchor' and used 'texttemplate' to cleanly align inner slice texts
             fig.update_traces(
-                textposition='inside', 
-                textinfo='percent',
+                textposition='inside',
+                texttemplate='%{percent:.1%}',
                 insidetextorientation='radial',
                 hovertemplate="<b>Taxon:</b> %{label}<br><b>Proportion:</b> %{customdata[0]}%<extra></extra>"
             )
             
-            # Layout optimization: Multi-line bottom legend and center text annotation
             fig.update_layout(
                 height=450,
                 margin=dict(t=20, b=20, l=20, r=20),
@@ -239,7 +241,6 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
                     x=0.5,
                     font=dict(size=11)
                 ),
-                # Add "Top 10 Species" text perfectly inside the donut hole
                 annotations=[
                     dict(
                         text='<b>Top 10<br>Species</b>',
@@ -276,16 +277,26 @@ def generate_html_report(analysis: dict, output_path: str):
     """Generates a highly styled, standalone HTML report with advanced layout structures."""
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Format Health Biomarkers rows
+    # Format Health Biomarkers rows with dynamic tooltip feature
     biomarker_rows_html = ""
     for b in analysis["biomarkers"]:
         status_class = "status-sufficient" if b["status"] == "Sufficient" else "status-low"
         pct_display = f"{b['relative_pct'] * 100:.2f}%"
+        threshold_display = f"{b['threshold_pct'] * 100:.2f}%"
+        
         biomarker_rows_html += f"""
         <tr>
           <td><strong>{html_escape(b['name'])}</strong></td>
           <td style="text-align:right; font-weight:600;">{pct_display}</td>
-          <td><span class="status-badge {status_class}">{b['status']}</span></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="status-badge {status_class}">{b['status']}</span>
+              <div class="tooltip-container">
+                <span class="info-icon">ⓘ</span>
+                <span class="tooltip-text">Threshold: {threshold_display}</span>
+              </div>
+            </div>
+          </td>
         </tr>"""
 
     # Format Top 10 profiling rows
@@ -398,6 +409,62 @@ def generate_html_report(analysis: dict, output_path: str):
   .chart-wrap {{ 
     padding: 20px;
   }}
+  
+  /* ── CSS Tooltip Styling ── */
+  .tooltip-container {{
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+  }}
+  .info-icon {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #9ca3af;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+  }}
+  .tooltip-container:hover .info-icon {{
+    background-color: #4f46e5;
+  }}
+  .tooltip-text {{
+    visibility: hidden;
+    width: 110px;
+    background-color: #1f2937;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-size: 11px;
+    position: absolute;
+    z-index: 10;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -55px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }}
+  .tooltip-text::after {{
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #1f2937 transparent transparent transparent;
+  }}
+  .tooltip-container:hover .tooltip-text {{
+    visibility: visible;
+    opacity: 1;
+  }}
+  
   footer {{
     max-width: 1000px;
     margin: 40px auto 0 auto;
@@ -422,11 +489,11 @@ def generate_html_report(analysis: dict, output_path: str):
     <h2>📈 Sequencing Overview & Alpha Diversity</h2>
     <div class="card metrics-grid">
       <div class="metric-box">
-        <div class="metric-val">{analysis['total_reads']:}</div>
+        <div class="metric-val">{analysis['total_reads']}</div>
         <div class="metric-lbl">Total Sample Depth</div>
       </div>
       <div class="metric-box">
-        <div class="metric-val">{analysis['distinct_otus']:}</div>
+        <div class="metric-val">{analysis['distinct_otus']}</div>
         <div class="metric-lbl">Observed Richness (OTUs)</div>
       </div>
       <div class="metric-box">

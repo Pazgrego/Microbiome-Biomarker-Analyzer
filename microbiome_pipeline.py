@@ -53,6 +53,17 @@ BIOMARKER_THRESHOLDS = {
 
 DEFAULT_BIOMARKER_THRESHOLD = 0.001        # 0.1%
 
+# ── SVG Vector Icon Definition for Perfect Symmetry ──────────────────────────
+
+# This replacing the standard text 'i' to guarantee pixel-perfect centering mimicking image_432282.png
+INFO_SVG = (
+    '<svg class="info-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    '<circle cx="12" cy="12" r="10"></circle>'
+    '<line x1="12" y1="16" x2="12" y2="12"></line>'
+    '<line x1="12" y1="8" x2="12.01" y2="8"></line>'
+    '</svg>'
+)
+
 # ── Helper functions ───────────────────────────────────────────────────────────
 
 def load_data(file_path: str, abundance_column: str = None) -> pd.DataFrame:
@@ -291,14 +302,14 @@ def generate_html_report(analysis: dict, output_path: str):
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="status-badge {status_class}">{b['status']}</span>
               <div class="tooltip-container">
-                <span class="info-icon">ⓘ</span>
+                {INFO_SVG}
                 <span class="tooltip-text">Threshold: {threshold_display}</span>
               </div>
             </div>
           </td>
         </tr>"""
 
-    # Format Top 10 profiling rows (Properly mapped only to 2 columns)
+    # Format Top 10 profiling rows
     top10_rows_html = ""
     for idx, r in enumerate(analysis["top10"]):
         pct_display = f"{r['RelativeAbundance'] * 100:.2f}%"
@@ -345,9 +356,6 @@ def generate_html_report(analysis: dict, output_path: str):
     grid-template-columns: 1fr;
     gap: 30px;
   }}
-  @media(min-width: 768px) {{
-    main {{ grid-template-columns: 1fr; }}
-  }}
   section h2 {{
     font-size: 18px;
     color: #374151;
@@ -368,9 +376,6 @@ def generate_html_report(analysis: dict, output_path: str):
     line-height: 1.6;
     font-size: 14.5px;
     color: #374151;
-  }}
-  .intro-text p:last-child {{
-    margin-bottom: 0;
   }}
   .intro-text h3 {{
     margin: 0 0 8px 0;
@@ -423,28 +428,27 @@ def generate_html_report(analysis: dict, output_path: str):
     padding: 20px;
   }}
   
-  /* ── CSS Tooltip Styling (FIXED positions for the arrow block) ── */
+  /* ── Pure SVG Centered Tooltip Styling (Perfect Symmetry) ── */
   .tooltip-container {{
     position: relative;
-    display: inline-block;
-    cursor: pointer;
-  }}
-  .info-icon {{
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+  }}
+  
+  /* Fixed sizing and pure vector symmetry using SVG stroke */
+  .info-icon-svg {{
     width: 16px;
     height: 16px;
-    border-radius: 50%;
-    background-color: #9ca3af;
-    color: white;
-    font-size: 11px;
-    font-weight: bold;
-    text-align: center;
+    color: #9ca3af;
+    transition: color 0.15s ease-in-out;
   }}
-  .tooltip-container:hover .info-icon {{
-    background-color: #4f46e5;
+  
+  .tooltip-container:hover .info-icon-svg {{
+    color: #4f46e5;
   }}
+  
   .tooltip-text {{
     visibility: hidden;
     width: 110px;
@@ -456,21 +460,22 @@ def generate_html_report(analysis: dict, output_path: str):
     font-size: 11px;
     position: absolute;
     z-index: 99;
-    bottom: 130%; /* Snaps perfectly to the icon */
+    bottom: 135%;
     left: 50%;
     transform: translateX(-50%);
     opacity: 0;
     transition: opacity 0.15s ease-in-out;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: normal;
   }}
-  /* Extra width variant for longer alpha diversity text descriptions */
   .tooltip-text.tooltip-text-wide {{
     width: 220px;
   }}
   .tooltip-text::after {{
     content: "";
     position: absolute;
-    top: 100%; /* Snaps exactly to the bottom boundary of the tooltip block */
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 5px;
@@ -505,10 +510,9 @@ def generate_html_report(analysis: dict, output_path: str):
   <section>
     <div class="card intro-text">
       <h3>What is the Microbiome?</h3>
-      <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract. In a healthy individual, these microbes exist in a dynamic balance, playing a fundamental role in metabolic functions, nutrient digestion, vitamin production, and immune system regulation.</p>
-      
+      <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract.</p>
       <h3>Why Gut Diversity Matters</h3>
-      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability. Conversely, a significant drop in diversity (often referred to as dysbiosis) is frequently associated with various health conditions, including inflammatory bowel diseases, metabolic disorders, and weakened immunity.</p>
+      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem.</p>
     </div>
   </section>
 
@@ -526,9 +530,9 @@ def generate_html_report(analysis: dict, output_path: str):
       <div class="metric-box">
         <div class="metric-val" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
           {analysis['shannon_index']}
-          <div class="tooltip-container" style="vertical-align: middle;">
-            <span class="info-icon">ⓘ</span>
-            <span class="tooltip-text tooltip-text-wide">Measures species diversity and evenness in the sample; higher values indicate a richer, more balanced community. Values above 3.0 are generally considered healthy, with higher scores reflecting a more resilient gut ecosystem</span>
+          <div class="tooltip-container">
+            {INFO_SVG}
+            <span class="tooltip-text tooltip-text-wide">Measures species diversity and evenness in the sample; higher values indicate a richer, more balanced community.</span>
           </div>
         </div>
         <div class="metric-lbl">Shannon Index (H')</div>
@@ -536,8 +540,8 @@ def generate_html_report(analysis: dict, output_path: str):
       <div class="metric-box">
         <div class="metric-val" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
           {analysis['simpson_index']}
-          <div class="tooltip-container" style="vertical-align: middle;">
-            <span class="info-icon">ⓘ</span>
+          <div class="tooltip-container">
+            {INFO_SVG}
             <span class="tooltip-text tooltip-text-wide">Estimates the probability that two randomly chosen individuals belong to different species; higher values mean greater diversity</span>
           </div>
         </div>
@@ -606,19 +610,12 @@ def main():
     parser = argparse.ArgumentParser(description="Microbiome OTU analysis pipeline")
     parser.add_argument("--input",  "-i", required=True, help="Path to OTU table (.csv or .numbers)")
     parser.add_argument("--output", "-o", default="report.html", help="Output HTML file (default: report.html)")
-    parser.add_argument(
-        "--abundance", "-a",
-        default=None,
-        help="Abundance column to use (default: Combined Abundance, or sole abundance column)",
-    )
+    parser.add_argument("--abundance", "-a", default=None, help="Abundance column to use")
     args = parser.parse_args()
 
     df       = load_data(args.input, abundance_column=args.abundance)
     analysis = analyze_microbiome(df)
-    generate_html_report(
-        analysis,
-        output_path=args.output
-    )
+    generate_html_report(analysis, output_path=args.output)
 
 
 if __name__ == "__main__":

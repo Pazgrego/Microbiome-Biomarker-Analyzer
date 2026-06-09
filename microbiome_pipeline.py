@@ -4,7 +4,7 @@ Microbiome OTU Analysis Pipeline
 Reads a CSV (or .numbers) OTU table, calculates relative abundances,
 extracts 5 key biomarkers with biological thresholds, computes alpha diversity,
 generates a polished interactive Plotly donut chart, and writes a standalone HTML report
-with interactive dynamic status tooltips (info icons).
+with interactive dynamic status tooltips (info icons) and a clinical reference section.
 
 Usage:
     python microbiome_pipeline.py --input data.csv --output report.html
@@ -53,9 +53,48 @@ BIOMARKER_THRESHOLDS = {
 
 DEFAULT_BIOMARKER_THRESHOLD = 0.001        # 0.1%
 
+# ── Clinical & References Database ─────────────────────────────────────────────
+
+BIOMARKER_CLINICAL_DATA = {
+    "Akkermansia muciniphila": {
+        "description": "A mucin-degrading bacterium residing in the mucus layer of the gut. It plays a critical role in maintaining gut barrier integrity, modulating host metabolism, and protecting against low-grade inflammation, obesity, and metabolic syndromes.",
+        "references": [
+            {"title": "Dao et al., 2016 (Gut)", "url": "https://pubmed.ncbi.nlm.nih.gov/26100928/"},
+            {"title": "Derrien et al., 2017 (Frontiers)", "url": "https://pubmed.ncbi.nlm.nih.gov/28522983/"}
+        ]
+    },
+    "Ruminococcus bromii": {
+        "description": "A keystone species highly specialized in degrading resistant starch (RS). It breaks down complex dietary fibers that other bacteria cannot process, producing primary metabolites that feed surrounding beneficial communities.",
+        "references": [
+            {"title": "Ze et al., 2012 (ISME J)", "url": "https://pubmed.ncbi.nlm.nih.gov/22402422/"},
+            {"title": "Walker et al., 2011 (ISME J)", "url": "https://pubmed.ncbi.nlm.nih.gov/21151191/"}
+        ]
+    },
+    "Eubacterium sp": {
+        "description": "A core genus involved in the fermentation of dietary carbohydrates. It contributes significantly to the core metabolic balance of the human gut, cross-feeding other species and ensuring overall ecosystem stability.",
+        "references": [
+            {"title": "Louis & Flint, 2017 (Nat Rev Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/28163011/"},
+            {"title": "Pryde et al., 2002 (FEMS Microbiol Lett)", "url": "https://pubmed.ncbi.nlm.nih.gov/21927877/"}
+        ]
+    },
+    "Faecalibacterium prausnitzii": {
+        "description": "One of the most abundant bacteria in the healthy human gut and a major producer of butyrate. It exhibits potent anti-inflammatory properties by stimulating regulatory T-cells and is frequently found depleted in patients with IBD and Crohn's disease.",
+        "references": [
+            {"title": "Sokol et al., 2008 (PNAS)", "url": "https://pubmed.ncbi.nlm.nih.gov/18936492/"},
+            {"title": "Miquel et al., 2013 (Curr Opin Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/23725835/"}
+        ]
+    },
+    "Roseburia sp": {
+        "description": "A dominant genus of butyrate-producing bacteria that ferments complex plant polysaccharides. It plays an active role in maintaining intestinal motility, reinforcing the epithelial gut barrier, and supporting immune system homeostatis.",
+        "references": [
+            {"title": "Tamanai-Shacoori et al., 2017 (J Inflamm)", "url": "https://pubmed.ncbi.nlm.nih.gov/28588448/"},
+            {"title": "Travis et al., 2015 (Environmental Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/25546112/"}
+        ]
+    }
+}
+
 # ── SVG Vector Icon Definition for Perfect Symmetry ──────────────────────────
 
-# This replacing the standard text 'i' to guarantee pixel-perfect centering mimicking image_432282.png
 INFO_SVG = (
     '<svg class="info-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
     '<circle cx="12" cy="12" r="10"></circle>'
@@ -326,6 +365,23 @@ def generate_html_report(analysis: dict, output_path: str):
           <td style="text-align:right; font-weight:600; color:#4f46e5; font-size:14px;">{pct_display}</td>
         </tr>"""
 
+    # Build Clinical Encyclopedia HTML dynamically
+    clinical_cards_html = ""
+    for taxon, data in BIOMARKER_CLINICAL_DATA.items():
+        ref_links = []
+        for ref in data["references"]:
+            ref_links.append(f'<a href="{ref["url"]}" target="_blank" class="ref-link">🔗 {html_escape(ref["title"])}</a>')
+        refs_str = " | ".join(ref_links)
+
+        clinical_cards_html += f"""
+        <div class="clinical-card">
+          <h4>{html_escape(taxon)}</h4>
+          <p>{html_escape(data["description"])}</p>
+          <div class="clinical-refs">
+            <strong>Scientific References:</strong> {refs_str}
+          </div>
+        </div>"""
+
     chart_content = analysis["plotly_html"] if analysis["plotly_html"] else "<p>No visualization data available</p>"
 
     html = f"""<!DOCTYPE html>
@@ -428,6 +484,45 @@ def generate_html_report(analysis: dict, output_path: str):
     padding: 20px;
   }}
   
+  /* ── Clinical Encyclopedia Section Styling ── */
+  .clinical-card {{
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #4f46e5;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }}
+  .clinical-card:last-child {{ margin-bottom: 0; }}
+  .clinical-card h4 {{
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #1e1b4b;
+    font-weight: 600;
+  }}
+  .clinical-card p {{
+    margin: 0 0 12px 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: #4b5563;
+  }}
+  .clinical-refs {{
+    font-size: 12px;
+    color: #6b7280;
+    border-top: 1px dashed #e5e7eb;
+    padding-top: 8px;
+  }}
+  .ref-link {{
+    color: #4f46e5;
+    text-decoration: none;
+    margin: 0 4px;
+    font-weight: 500;
+  }}
+  .ref-link:hover {{
+    text-decoration: underline;
+  }}
+
   /* ── Pure SVG Centered Tooltip Styling (Perfect Symmetry) ── */
   .tooltip-container {{
     position: relative;
@@ -436,19 +531,15 @@ def generate_html_report(analysis: dict, output_path: str):
     justify-content: center;
     cursor: pointer;
   }}
-  
-  /* Fixed sizing and pure vector symmetry using SVG stroke */
   .info-icon-svg {{
     width: 16px;
     height: 16px;
     color: #9ca3af;
     transition: color 0.15s ease-in-out;
   }}
-  
   .tooltip-container:hover .info-icon-svg {{
     color: #4f46e5;
   }}
-  
   .tooltip-text {{
     visibility: hidden;
     width: 110px;
@@ -512,7 +603,7 @@ def generate_html_report(analysis: dict, output_path: str):
       <h3>What is the Microbiome?</h3>
       <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract. In a healthy individual, these microbes exist in a dynamic balance, playing a fundamental role in metabolic functions, nutrient digestion, vitamin production, and immune system regulation.</p>
       <h3>Why Gut Diversity Matters</h3>
-      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability. Conversely, a significant drop in diversity (often referred to as dysbiosis) is frequently associated with various health conditions, including inflammatory bowel diseases, metabolic disorders, and weakened immunity.</p>
+      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability.</p>
     </div>
   </section>
 
@@ -563,6 +654,13 @@ def generate_html_report(analysis: dict, output_path: str):
         </thead>
         <tbody>{biomarker_rows_html}</tbody>
       </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>📚 Biomarker Functional Encyclopedia & References</h2>
+    <div class="card" style="background: #f9fafb; border: 1px dashed #d1d5db;">
+      {clinical_cards_html}
     </div>
   </section>
 

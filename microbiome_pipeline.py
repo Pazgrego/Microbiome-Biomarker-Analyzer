@@ -292,7 +292,7 @@ def generate_html_report(analysis: dict, output_path: str):
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="status-badge {status_class}">{b['status']}</span>
               <div class="tooltip-container">
-                <span class="info-icon">ⓘ</span>
+                <span class="info-icon">i</span>
                 <span class="tooltip-text">Threshold: {threshold_display}</span>
               </div>
             </div>
@@ -376,7 +376,16 @@ def generate_html_report(analysis: dict, output_path: str):
     text-align: center;
   }}
   .metric-val {{ font-size: 24px; font-weight: bold; color: #4f46e5; margin-bottom: 4px; }}
-  .metric-lbl {{ font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }}
+  .metric-lbl {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }}
   table {{
     width: 100%;
     border-collapse: collapse;
@@ -464,6 +473,14 @@ def generate_html_report(analysis: dict, output_path: str):
     visibility: visible;
     opacity: 1;
   }}
+  .tooltip-text-wide {{
+    width: 220px;
+    margin-left: -110px;
+    text-align: left;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: normal;
+  }}
   
   footer {{
     max-width: 1000px;
@@ -479,14 +496,14 @@ def generate_html_report(analysis: dict, output_path: str):
 <body>
 
 <header>
-  <h1>🔬 Microbiome Analysis Report</h1>
+  <h1>Microbiome Analysis Report</h1>
   <p class="subtitle">Automated high-throughput OTU profiling pipeline</p>
 </header>
 
 <main>
 
   <section>
-    <h2>📈 Sequencing Overview & Alpha Diversity</h2>
+    <h2>Sequencing Overview & Alpha Diversity</h2>
     <div class="card metrics-grid">
       <div class="metric-box">
         <div class="metric-val">{analysis['total_reads']}</div>
@@ -498,17 +515,29 @@ def generate_html_report(analysis: dict, output_path: str):
       </div>
       <div class="metric-box">
         <div class="metric-val">{analysis['shannon_index']}</div>
-        <div class="metric-lbl">Shannon Index (H')</div>
+        <div class="metric-lbl">
+          <span>Shannon Index (H')</span>
+          <div class="tooltip-container">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text tooltip-text-wide">Measures species diversity and evenness in the sample; higher values indicate a richer, more balanced community. Values above 3.0 are generally considered healthy, with higher scores reflecting a more resilient gut ecosystem</span>
+          </div>
+        </div>
       </div>
       <div class="metric-box">
         <div class="metric-val">{analysis['simpson_index']}</div>
-        <div class="metric-lbl">Simpson's Diversity (1-D)</div>
+        <div class="metric-lbl">
+          <span>Simpson's Diversity (1-D)</span>
+          <div class="tooltip-container">
+            <span class="info-icon">i</span>
+            <span class="tooltip-text tooltip-text-wide">Estimates the probability that two randomly chosen individuals belong to different species; higher values mean greater diversity.</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>🛡️ Health Biomarkers</h2>
+    <h2>Health Biomarkers</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>
@@ -524,7 +553,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>🎨 Composition Profile (Interactive)</h2>
+    <h2>Composition Profile (Interactive)</h2>
     <div class="card chart-wrap">
       <div style="width: 100%;">
         {chart_content}
@@ -533,7 +562,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>📊 Top 10 Most Abundant Species</h2>
+    <h2>Top 10 Most Abundant Species</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>

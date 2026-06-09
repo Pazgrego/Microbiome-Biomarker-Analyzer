@@ -221,7 +221,6 @@ def analyze_microbiome(df: pd.DataFrame) -> dict:
                 custom_data=['Percentage']
             )
             
-            # FIXED: Removed 'insidetextanchor' and used 'texttemplate' to cleanly align inner slice texts
             fig.update_traces(
                 textposition='inside',
                 texttemplate='%{percent:.1%}',
@@ -292,14 +291,14 @@ def generate_html_report(analysis: dict, output_path: str):
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="status-badge {status_class}">{b['status']}</span>
               <div class="tooltip-container">
-                <span class="info-icon">i</span>
+                <span class="info-icon">ⓘ</span>
                 <span class="tooltip-text">Threshold: {threshold_display}</span>
               </div>
             </div>
           </td>
         </tr>"""
 
-    # Format Top 10 profiling rows
+    # Format Top 10 profiling rows (Properly mapped only to 2 columns)
     top10_rows_html = ""
     for idx, r in enumerate(analysis["top10"]):
         pct_display = f"{r['RelativeAbundance'] * 100:.2f}%"
@@ -364,6 +363,20 @@ def generate_html_report(analysis: dict, output_path: str):
     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
     box-sizing: border-box;
   }}
+  .intro-text p {{
+    margin: 0 0 16px 0;
+    line-height: 1.6;
+    font-size: 14.5px;
+    color: #374151;
+  }}
+  .intro-text p:last-child {{
+    margin-bottom: 0;
+  }}
+  .intro-text h3 {{
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #1e1b4b;
+  }}
   .metrics-grid {{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -376,16 +389,7 @@ def generate_html_report(analysis: dict, output_path: str):
     text-align: center;
   }}
   .metric-val {{ font-size: 24px; font-weight: bold; color: #4f46e5; margin-bottom: 4px; }}
-  .metric-lbl {{
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    font-size: 11px;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }}
+  .metric-lbl {{ font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }}
   table {{
     width: 100%;
     border-collapse: collapse;
@@ -419,7 +423,7 @@ def generate_html_report(analysis: dict, output_path: str):
     padding: 20px;
   }}
   
-  /* ── CSS Tooltip Styling ── */
+  /* ── CSS Tooltip Styling (FIXED positions for the arrow block) ── */
   .tooltip-container {{
     position: relative;
     display: inline-block;
@@ -448,23 +452,27 @@ def generate_html_report(analysis: dict, output_path: str):
     color: #fff;
     text-align: center;
     border-radius: 6px;
-    padding: 5px 8px;
+    padding: 6px 8px;
     font-size: 11px;
     position: absolute;
-    z-index: 10;
-    bottom: 125%;
+    z-index: 99;
+    bottom: 130%; /* Snaps perfectly to the icon */
     left: 50%;
-    margin-left: -55px;
+    transform: translateX(-50%);
     opacity: 0;
-    transition: opacity 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: opacity 0.15s ease-in-out;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }}
+  /* Extra width variant for longer alpha diversity text descriptions */
+  .tooltip-text.tooltip-text-wide {{
+    width: 220px;
   }}
   .tooltip-text::after {{
     content: "";
     position: absolute;
-    top: 100%;
+    top: 100%; /* Snaps exactly to the bottom boundary of the tooltip block */
     left: 50%;
-    margin-left: -5px;
+    transform: translateX(-50%);
     border-width: 5px;
     border-style: solid;
     border-color: #1f2937 transparent transparent transparent;
@@ -472,14 +480,6 @@ def generate_html_report(analysis: dict, output_path: str):
   .tooltip-container:hover .tooltip-text {{
     visibility: visible;
     opacity: 1;
-  }}
-  .tooltip-text-wide {{
-    width: 220px;
-    margin-left: -110px;
-    text-align: left;
-    line-height: 1.4;
-    text-transform: none;
-    letter-spacing: normal;
   }}
   
   footer {{
@@ -496,14 +496,24 @@ def generate_html_report(analysis: dict, output_path: str):
 <body>
 
 <header>
-  <h1>Microbiome Analysis Report</h1>
+  <h1>🔬 Microbiome Analysis Report</h1>
   <p class="subtitle">Automated high-throughput OTU profiling pipeline</p>
 </header>
 
 <main>
 
   <section>
-    <h2>Sequencing Overview & Alpha Diversity</h2>
+    <div class="card intro-text">
+      <h3>What is the Microbiome?</h3>
+      <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract. In a healthy individual, these microbes exist in a dynamic balance, playing a fundamental role in metabolic functions, nutrient digestion, vitamin production, and immune system regulation.</p>
+      
+      <h3>Why Gut Diversity Matters</h3>
+      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability. Conversely, a significant drop in diversity (often referred to as dysbiosis) is frequently associated with various health conditions, including inflammatory bowel diseases, metabolic disorders, and weakened immunity.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>📈 Sequencing Overview & Alpha Diversity</h2>
     <div class="card metrics-grid">
       <div class="metric-box">
         <div class="metric-val">{analysis['total_reads']}</div>
@@ -514,30 +524,30 @@ def generate_html_report(analysis: dict, output_path: str):
         <div class="metric-lbl">Observed Richness (OTUs)</div>
       </div>
       <div class="metric-box">
-        <div class="metric-val">{analysis['shannon_index']}</div>
-        <div class="metric-lbl">
-          <span>Shannon Index (H')</span>
-          <div class="tooltip-container">
-            <span class="info-icon">i</span>
+        <div class="metric-val" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+          {analysis['shannon_index']}
+          <div class="tooltip-container" style="vertical-align: middle;">
+            <span class="info-icon">ⓘ</span>
             <span class="tooltip-text tooltip-text-wide">Measures species diversity and evenness in the sample; higher values indicate a richer, more balanced community. Values above 3.0 are generally considered healthy, with higher scores reflecting a more resilient gut ecosystem</span>
           </div>
         </div>
+        <div class="metric-lbl">Shannon Index (H')</div>
       </div>
       <div class="metric-box">
-        <div class="metric-val">{analysis['simpson_index']}</div>
-        <div class="metric-lbl">
-          <span>Simpson's Diversity (1-D)</span>
-          <div class="tooltip-container">
-            <span class="info-icon">i</span>
-            <span class="tooltip-text tooltip-text-wide">Estimates the probability that two randomly chosen individuals belong to different species; higher values mean greater diversity.</span>
+        <div class="metric-val" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; width: 100%;">
+          {analysis['simpson_index']}
+          <div class="tooltip-container" style="vertical-align: middle;">
+            <span class="info-icon">ⓘ</span>
+            <span class="tooltip-text tooltip-text-wide">Estimates the probability that two randomly chosen individuals belong to different species; higher values mean greater diversity</span>
           </div>
         </div>
+        <div class="metric-lbl">Simpson's Diversity (1-D)</div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2>Health Biomarkers</h2>
+    <h2>🛡️ Health Biomarkers</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>
@@ -553,7 +563,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>Composition Profile (Interactive)</h2>
+    <h2>🎨 Composition Profile (Interactive)</h2>
     <div class="card chart-wrap">
       <div style="width: 100%;">
         {chart_content}
@@ -562,7 +572,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>Top 10 Most Abundant Species</h2>
+    <h2>📊 Top 10 Most Abundant Species</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>

@@ -510,9 +510,9 @@ def generate_html_report(analysis: dict, output_path: str):
   <section>
     <div class="card intro-text">
       <h3>What is the Microbiome?</h3>
-      <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract.</p>
+      <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract. In a healthy individual, these microbes exist in a dynamic balance, playing a fundamental role in metabolic functions, nutrient digestion, vitamin production, and immune system regulation.</p>
       <h3>Why Gut Diversity Matters</h3>
-      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem.</p>
+      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability. Conversely, a significant drop in diversity (often referred to as dysbiosis) is frequently associated with various health conditions, including inflammatory bowel diseases, metabolic disorders, and weakened immunity.</p>
     </div>
   </section>
 

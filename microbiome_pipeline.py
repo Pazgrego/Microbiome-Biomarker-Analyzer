@@ -59,36 +59,34 @@ BIOMARKER_CLINICAL_DATA = {
     "Akkermansia muciniphila": {
         "description": "A mucin-degrading bacterium residing in the mucus layer of the gut. It plays a critical role in maintaining gut barrier integrity, modulating host metabolism, and protecting against low-grade inflammation, obesity, and metabolic syndromes.",
         "references": [
-            {"title": "Dao et al., 2016 (Gut)", "url": "https://pubmed.ncbi.nlm.nih.gov/26100928/"},
-            {"title": "Derrien et al., 2017 (Frontiers)", "url": "https://pubmed.ncbi.nlm.nih.gov/28522983/"}
+            {"title": "Derrien et al., 2008 (Appl Environ Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/18083887/"},
+            {"title": "Roopchand et al., 2015 (Diabetes)", "url": "https://pubmed.ncbi.nlm.nih.gov/25845659/"}
         ]
     },
     "Ruminococcus bromii": {
         "description": "A keystone species highly specialized in degrading resistant starch (RS). It breaks down complex dietary fibers that other bacteria cannot process, producing primary metabolites that feed surrounding beneficial communities.",
         "references": [
-            {"title": "Ze et al., 2012 (ISME J)", "url": "https://pubmed.ncbi.nlm.nih.gov/22402422/"},
-            {"title": "Walker et al., 2011 (ISME J)", "url": "https://pubmed.ncbi.nlm.nih.gov/21151191/"}
+            {"title": "Ze et al., 2012 (ISME J)", "url": "https://pubmed.ncbi.nlm.nih.gov/22343308/"},
+            {"title": "Venkataraman et al., 2016 (Microbiome)", "url": "https://pubmed.ncbi.nlm.nih.gov/27357127/"}
         ]
     },
     "Eubacterium sp": {
         "description": "A core genus involved in the fermentation of dietary carbohydrates. It contributes significantly to the core metabolic balance of the human gut, cross-feeding other species and ensuring overall ecosystem stability.",
         "references": [
-            {"title": "Louis & Flint, 2017 (Nat Rev Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/28163011/"},
-            {"title": "Pryde et al., 2002 (FEMS Microbiol Lett)", "url": "https://pubmed.ncbi.nlm.nih.gov/21927877/"}
-        ]
+            {"title": "Mukherjee et al., 2020 (Gut Microbes)", "url": "https://pubmed.ncbi.nlm.nih.gov/32835590/"}        ]
     },
     "Faecalibacterium prausnitzii": {
         "description": "One of the most abundant bacteria in the healthy human gut and a major producer of butyrate. It exhibits potent anti-inflammatory properties by stimulating regulatory T-cells and is frequently found depleted in patients with IBD and Crohn's disease.",
         "references": [
-            {"title": "Sokol et al., 2008 (PNAS)", "url": "https://pubmed.ncbi.nlm.nih.gov/18936492/"},
-            {"title": "Miquel et al., 2013 (Curr Opin Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/23725835/"}
+            {"title": "Heinken et al., 2014 (J Bacteriol)", "url": "https://pubmed.ncbi.nlm.nih.gov/25002542/"},
+            {"title": "Miquel et al., 2013 (Curr Opin Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/23831042/"}
         ]
     },
     "Roseburia sp": {
         "description": "A dominant genus of butyrate-producing bacteria that ferments complex plant polysaccharides. It plays an active role in maintaining intestinal motility, reinforcing the epithelial gut barrier, and supporting immune system homeostatis.",
         "references": [
-            {"title": "Tamanai-Shacoori et al., 2017 (J Inflamm)", "url": "https://pubmed.ncbi.nlm.nih.gov/28588448/"},
-            {"title": "Travis et al., 2015 (Environmental Microbiol)", "url": "https://pubmed.ncbi.nlm.nih.gov/25546112/"}
+            {"title": "Moreno-Indias et al., 2016 (Food Funct)", "url": "https://pubmed.ncbi.nlm.nih.gov/26599039/"},
+            {"title": "Machiels et al., 2014 (Gut)", "url": "https://pubmed.ncbi.nlm.nih.gov/24021287/"}
         ]
     }
 }

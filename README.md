@@ -13,7 +13,7 @@ This project is an automated data pipeline designed to bridge that gap. It takes
    pip install pandas matplotlib
    ```
 
-2. **Generate the report** from an OTU table (CSV or `.numbers`):
+2. **Generate the report** from an OTU table (CSV):
 
    ```bash
    python microbiome_pipeline.py --input sample_otu_table.csv --output report.html
@@ -21,32 +21,18 @@ This project is an automated data pipeline designed to bridge that gap. It takes
 
    Use your own file with `--input` / `-i`. Optional: `--output` / `-o` (default: `report.html`).
 
-3. **Open the HTML** in your browser (macOS):
+3. **Open the HTML** in your browser:
 
    ```bash
    open report.html
    ```
 
-   Or double-click `report.html` in Finder. The report is a standalone file—no server needed.
 
 ## Core Features
 1. **Raw Data Translation:** Converts technical OTU tables (CSV format) into user-friendly insights.
 2. **Relative Abundance Made Simple:** Translates raw bacterial sequence counts into clear percentages so users know exactly what ratio of their gut is made up of which bacteria.
 3. **Personalized Biomarker Screening:** Scans the sample for critical bacteria that impact daily health and flags them using intuitive visual cues.
 4. **Consumer-Friendly Dashboard:** Generates a standalone, beautifully structured `report.html` file that reads like a commercial health report rather than a laboratory printout.
-
-![Gut health dashboard](docs/screenshot.png)
-
-## Tracked Bacterial Markers (Examples for Proof of Concept)
-The pipeline is built with a modular architecture, meaning it can easily expand to track any bacterial profile. For the initial **Proof of Concept (POC)**, the system is pre-configured to detect and explain a representative list of key bacteria known to heavily influence overall wellness:
-
-* *Akkermansia muciniphila* (Example of a marker linked to metabolic health and a strong gut lining)
-* *Ruminococcus bromii* (Example of a major helper in breaking down dietary starches and fibers)
-* *Eubacterium sp.* (Example of a genus important for producing beneficial gut compounds)
-* *Faecalibacterium prausnitzii* (Example of a core anti-inflammatory gut bacterium)
-* *Roseburia sp.* (Example of a key short-chain fatty acid producer vital for gut energy)
-
-*Note: This specific list serves as an initial showcase profile to demonstrate the system's filtering and customer-facing explanation capabilities. It will be expanded to support broader health panels in future versions.*
 
 ---
 

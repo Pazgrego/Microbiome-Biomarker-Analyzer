@@ -368,7 +368,7 @@ def generate_html_report(analysis: dict, output_path: str):
     for taxon, data in BIOMARKER_CLINICAL_DATA.items():
         ref_links = []
         for ref in data["references"]:
-            ref_links.append(f'<a href="{ref["url"]}" target="_blank" class="ref-link">🔗 {html_escape(ref["title"])}</a>')
+            ref_links.append(f'<a href="{ref["url"]}" target="_blank" class="ref-link">{html_escape(ref["title"])}</a>')
         refs_str = " | ".join(ref_links)
 
         clinical_cards_html += f"""
@@ -590,7 +590,7 @@ def generate_html_report(analysis: dict, output_path: str):
 <body>
 
 <header>
-  <h1>🔬 Microbiome Analysis Report</h1>
+  <h1>Microbiome Analysis Report</h1>
   <p class="subtitle">Automated high-throughput OTU profiling pipeline</p>
 </header>
 
@@ -601,12 +601,12 @@ def generate_html_report(analysis: dict, output_path: str):
       <h3>What is the Microbiome?</h3>
       <p>The microbiome refers to the vast community of trillions of microorganisms—including bacteria, viruses, and fungi—that inhabit the human body, particularly the gastrointestinal tract. In a healthy individual, these microbes exist in a dynamic balance, playing a fundamental role in metabolic functions, nutrient digestion, vitamin production, and immune system regulation.</p>
       <h3>Why Gut Diversity Matters</h3>
-      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability.</p>
+      <p>Research shows that a high richness and diversity of microbial species is a key indicator of a resilient and healthy gut ecosystem. A well-diversified microbiome is better equipped to protect against pathogens and maintain metabolic stability. Conversely, a significant drop in diversity (often referred to as dysbiosis) is frequently associated with various health conditions, including inflammatory bowel diseases, metabolic disorders, and weakened immunity</p>
     </div>
   </section>
 
   <section>
-    <h2>📈 Sequencing Overview & Alpha Diversity</h2>
+    <h2>Sequencing Overview & Alpha Diversity</h2>
     <div class="card metrics-grid">
       <div class="metric-box">
         <div class="metric-val">{analysis['total_reads']}</div>
@@ -640,7 +640,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>🛡️ Health Biomarkers</h2>
+    <h2>Health Biomarkers</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>
@@ -656,14 +656,14 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>📚 Biomarker Functional Encyclopedia & References</h2>
+    <h2>Biomarker Functional Encyclopedia & References</h2>
     <div class="card" style="background: #f9fafb; border: 1px dashed #d1d5db;">
       {clinical_cards_html}
     </div>
   </section>
 
   <section>
-    <h2>🎨 Composition Profile (Interactive)</h2>
+    <h2>Composition Profile (Interactive)</h2>
     <div class="card chart-wrap">
       <div style="width: 100%;">
         {chart_content}
@@ -672,7 +672,7 @@ def generate_html_report(analysis: dict, output_path: str):
   </section>
 
   <section>
-    <h2>📊 Top 10 Most Abundant Species</h2>
+    <h2>Top 10 Most Abundant Species</h2>
     <div class="card" style="padding:0; overflow:hidden;">
       <table>
         <thead>

@@ -16,7 +16,7 @@ This project is an automated data pipeline designed to bridge that gap. It takes
 2. **Generate the report** from an OTU table (CSV):
 
    ```bash
-   python microbiome_pipeline.py --input OTU_Table_P37.csv --output report.html
+   python microbiome_pipeline.py --input docs/OTU_Table_P37.csv --output report.html
    ```
 
    Use your own file with `--input` / `-i`. Optional: `--output` / `-o` (default: `report.html`).

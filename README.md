@@ -29,23 +29,64 @@ This project is an automated data pipeline designed to bridge that gap. It takes
 
 
 ## Core Features
-1. **Raw Data Translation:** Converts technical OTU tables (CSV format) into user-friendly insights.
-2. **Relative Abundance Made Simple:** Translates raw bacterial sequence counts into clear percentages so users know exactly what ratio of their gut is made up of which bacteria.
-3. **Personalized Biomarker Screening:** Scans the sample for critical bacteria that impact daily health and flags them using intuitive visual cues.
-4. **Consumer-Friendly Dashboard:** Generates a standalone, beautifully structured `report.html` file that reads like a commercial health report rather than a laboratory printout.
+
+1. **OTU table ingestion and normalization** — Reads CSV files, requires `Name` and `Taxonomy` columns, auto-detects an abundance column (`Combined Abundance`, `Abundance`, or any column containing `"abundance"`), and supports an optional `--abundance` override.
+
+2. **Relative abundance calculation** — Sums total reads and converts raw counts into per-OTU relative abundances (proportions of the sample). Rows with zero abundance are filtered out before analysis.
+
+3. **Alpha diversity metrics** — Computes Shannon index (species richness and evenness) and Simpson diversity (1 − D), plus total sample depth (total reads) and observed richness (count of non-zero OTUs).
+
+4. **Biomarker screening against biological thresholds** — Searches five gut-health taxa via fuzzy taxonomy matching and classifies each as **Sufficient** or **Low / Absent** based on combined relative abundance:
+
+   | Biomarker | Threshold |
+   |---|---|
+   | *Faecalibacterium prausnitzii* | 1.0% |
+   | *Eubacterium sp* | 1.0% |
+   | *Akkermansia muciniphila* | 0.3% |
+   | *Roseburia sp* | 0.5% |
+   | *Ruminococcus bromii* | 0.5% |
+
+5. **Top-10 composition profiling** — Ranks OTUs by abundance, extracts human-readable labels from taxonomy strings (species name, or genus + `sp.`), and builds a top-10 species table with percentages.
+
+6. **Interactive visualization** — Generates a Plotly donut chart of the top 10 taxa with hover tooltips showing proportions, embedded in the output HTML via Plotly's CDN.
+
+7. **Standalone HTML report generation** — Assembles everything into a single self-contained `report.html` with sequencing overview and diversity metrics (with explanatory tooltips), a biomarker status table (color-coded badges and threshold tooltips), a clinical encyclopedia with descriptions and PubMed reference links, the interactive composition chart, a top-10 abundance table, and introductory educational text about the microbiome.
+
 
 ---
 
 ## Technical Architecture & Dependencies
-The pipeline is entirely built using **Python 3.x** and relies on the following standard data libraries:
-* `pandas` - For reading the input data, filtering target species, and sorting percentages.
-* `matplotlib` or `plotly` - For generating accessible visualizations (e.g., Top 10 Most Abundant Bacteria Pie Charts).
-* `jinja2` (or Python native f-strings) - For rendering the dynamic health data into an elegant, non-technical HTML layout.
+
+The project is a single Python script (`microbiome_pipeline.py`) with three main stages:
+
+1. **`load_data()`** — Ingests a CSV file, validates required columns, and normalizes abundance data.
+2. **`analyze_microbiome()`** — Computes relative abundances, alpha diversity, biomarker status, top-10 taxa, and a Plotly chart snippet.
+3. **`generate_html_report()`** — Renders a standalone HTML report using Python f-strings and embedded CSS.
+
+### Dependencies
+
+**Required** (Python 3):
+
+```bash
+pip install pandas numpy plotly
+```
+
+| Package | Role |
+|---|---|
+| `pandas` | Load OTU tables, filter and aggregate taxa, rank abundances |
+| `numpy` | Shannon and Simpson diversity calculations |
+| `plotly` | Interactive top-10 donut chart (served via Plotly CDN in the HTML output) |
+
 
 ### Expected Input Format
-The application expects a standard **CSV file** generated from sequencing pipelines, structured with taxonomic identifiers and abundance counts:
+
+The pipeline expects a **CSV** file with at least `Name`, `Taxonomy`, and an abundance column (`Abundance`, `Combined Abundance`, or any column whose name contains `"abundance"`):
+
 ```csv
-Taxonomy,Counts
-"k__Bacteria;p__Verrucomicrobia;g__Akkermansia;s__muciniphila",1420
-"k__Bacteria;p__Firmicutes;g__Faecalibacterium;s__prausnitzii",3850
+Name,Taxonomy,Abundance
+OTU_001,"Bacteria; Firmicutes; Clostridia; Clostridiales; Ruminococcaceae; Faecalibacterium prausnitzii",32781
+OTU_005,"Bacteria; Verrucomicrobia; Verrucomicrobiae; Verrucomicrobiales; Akkermansiaceae; Akkermansia muciniphila",6100
 ...
+```
+
+Use `--abundance <column>` if your file has multiple abundance columns and auto-detection should not be used.
